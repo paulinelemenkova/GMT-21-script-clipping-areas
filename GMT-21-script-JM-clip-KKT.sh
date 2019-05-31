@@ -1,9 +1,9 @@
 #!/bin/bash
-# Purpose: Clipping of raster image using coastlines, here: Mariana Trench
+# Purpose: Clipping of raster image using coastlines, here: Kuril-Kamchatka Trench
 # GMT modules: gmtset, gmtdefaults, grd2cpt, grdimage, pscoast, makecpt, grdcontour, psbasemap, psscale, logo, psconvert
 # Unix progs: rm
 # Step-1. Generate a file
-ps=GMT_clip_MT.ps
+ps=GMT_clip_KKT.ps
 
 # Step-2. GMT set up
 gmt set FORMAT_GEO_MAP=dddF \
@@ -21,23 +21,22 @@ gmt set FORMAT_GEO_MAP=dddF \
 # Step-3. Overwrite defaults of GMT
 gmtdefaults -D > .gmtdefaults
 
-# Step-4. Generate geoid image with coloring and contour
+# Step-4. Generate geoid image with coloring
 gmt grd2cpt geoid.egm96.grd -Chaxby > geoid.cpt
-gmt grdimage geoid.egm96.grd -I+a45+nt1 -R120/160/5/30 -JM6.5i -Cgeoid.cpt -P -K > $ps
-gmt grdcontour geoid.egm96.grd -R -J -C2 -A2+f8p+gwhite -Wthin,blue -O -K >> $ps
+gmt grdimage geoid.egm96.grd -I+a45+nt1 -R140/170/40/60 -JM6.5i -Cgeoid.cpt -P -K > $ps
 
 # Step-5. Use gmt pscoast to initiate clip path for land
-gmt pscoast -R120/160/5/30 -J -Dh -Gc -O -K >> $ps
+gmt pscoast -R140/170/40/60 -J -Dh -Gc -O -K >> $ps
 
 # Step-6. Generate topography image w/shading
-gmt makecpt -C150 -T-11000,2000 -N > shadeMT.cpt
-gmt grdimage geoid.egm96.grd -I+a45+nt1 -R -J -CshadeMT.cpt -O -K >> $ps
+gmt makecpt -C150 -T-10000,2000 -N > shade.cpt
+gmt grdimage geoid.egm96.grd -I+a45+nt1 -R -J -Cshade.cpt -O -K >> $ps
 
 # Step-7. Undo clipping and overlay basemap
-gmt pscoast -R -J -O -K -Q -B+t"Color geoid image of the Mariana Trench with gray-shaded topography of the clipped land areas" >> $ps
+gmt pscoast -R -J -O -K -Q -B+t"Color geoid image of the Kuril-Kamchatka Trench with gray-shaded topography of the clipped land areas" >> $ps
 
 # Step-8. Add shorelines
-gmt grdcontour mt_relief.nc -R -J -C1000 -O -K >> $ps
+gmt grdcontour kkt_relief.nc -R -J -C1000 -O -K >> $ps
 
 # Step-9. Add grid
 gmt psbasemap -R -J \
@@ -50,7 +49,7 @@ gmt psscale -DjTC+o0.8c/-1.6c+w12c/0.5c+h -R -J -Cgeoid.cpt -Bx10f1 -By+lmGal -I
 gmt psbasemap -R -J \
     --FONT=8p,Palatino-Roman,dimgray \
     --MAP_TITLE_OFFSET=0.3c \
-    -Tdx1.0c/10.0c+w0.3i+f2+l+o0.0c \
+    -Tdx1.0c/13.3c+w0.3i+f2+l+o0.15i \
     -Lx5.3i/-0.5i+c50+w500k+l"Mercator projection. Scale (km)"+f \
     -UBL/-15p/-40p -O -K >> $ps
 
@@ -58,7 +57,7 @@ gmt psbasemap -R -J \
 gmt logo -Dx6.2/-2.2+o0.1i/0.1i+w2c -O >> $ps
 
 # Step-14. Convert to image file using GhostScript
-gmt psconvert GMT_clip_MT.ps -A0.2c -E720 -Tj -P -Z
+gmt psconvert GMT_clip_KKT.ps -A0.2c -E720 -Tj -P -Z
 
 # Step-15. Clean up
-rm -f geoid.cpt shadeMT.cpt
+rm -f geoid.cpt shade.cpt
